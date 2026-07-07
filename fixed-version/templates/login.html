@@ -9,7 +9,7 @@
     {% endif %}
 
     <form method="POST" action="/login" class="form">
-        {# 修复 #7：添加 CSRF Token 防护 #}
+        {# 修复 #6：CSRF Token 防护 #}
         <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
 
         <div class="form-group">
