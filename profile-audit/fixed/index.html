@@ -15,6 +15,7 @@
         </div>
         <div class="btn-group">
             <a href="/logout" class="btn btn-secondary">退出登录</a>
+            {# 修复 VULN-PR-06：通过 /profile 无参跳转，由路由内部解析当前登录用户 #}
             <a href="/profile" class="btn btn-primary btn-inline">个人中心</a>
             <a href="/upload" class="btn btn-primary btn-inline">上传头像</a>
         </div>
