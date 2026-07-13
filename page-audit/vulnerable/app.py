@@ -1,5 +1,4 @@
 import os
-import re
 import secrets
 import uuid
 import sqlite3
@@ -439,7 +438,7 @@ def recharge():
 
 
 # ═══════════════════════════════════════════
-# 动态页面加载路由（安全加固版）
+# 动态页面加载路由（文件路径拼接，无校验）
 # ═══════════════════════════════════════════
 @app.route("/page")
 def page():
@@ -447,26 +446,18 @@ def page():
     if not name:
         return "缺少页面名称", 400
 
-    # 修复 VULN-PG-01：字符白名单校验，从源头阻止路径穿越
-    if not re.match(r'^[a-zA-Z0-9_-]+$', name):
-        return "非法的页面名称", 400
-
+    # 直接拼接用户输入的 name 到路径中
+    filepath = os.path.join("pages", name)
     page_content = None
-    pages_dir = os.path.join(app.root_path, "pages")
 
-    # 修复 VULN-PG-01、VULN-PG-02：规范化路径，确认在 pages/ 范围内
-    safe_path = os.path.realpath(os.path.join(pages_dir, name))
-    if not safe_path.startswith(os.path.realpath(pages_dir)):
-        return "非法的页面名称", 400
-
-    # 尝试直接打开，再尝试加 .html 后缀
-    if os.path.isfile(safe_path):
-        with open(safe_path, "r", encoding="utf-8") as f:
+    if os.path.isfile(filepath):
+        with open(filepath, "r", encoding="utf-8") as f:
             page_content = f.read()
     else:
-        html_path = safe_path + ".html"
-        if os.path.isfile(html_path):
-            with open(html_path, "r", encoding="utf-8") as f:
+        # 尝试加上 .html 后缀
+        filepath_html = os.path.join("pages", name + ".html")
+        if os.path.isfile(filepath_html):
+            with open(filepath_html, "r", encoding="utf-8") as f:
                 page_content = f.read()
         else:
             page_content = "页面不存在"

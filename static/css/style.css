@@ -376,3 +376,26 @@ body {
 .btn-inline {
     width: auto !important;
 }
+
+/* 动态页面内容 */
+.page-content {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+}
+
+.page-content h1 {
+    font-size: 20px;
+    color: #667eea;
+    margin-bottom: 16px;
+}
+
+.page-content h2 {
+    font-size: 16px;
+    color: #555;
+    margin: 16px 0 8px;
+}
+
+.page-content p {
+    margin-bottom: 12px;
+}
