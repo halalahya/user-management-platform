@@ -246,7 +246,8 @@ def register():
 
 ```bash
 # 1. 启动漏洞版
-cd /root/user-management-platform/sqli-lab
+cd sqli-lab
+pip install flask
 python vulnerable-app.py
 
 # 2. 测试 POC（新开终端）
@@ -259,3 +260,9 @@ python fixed-app.py
 
 # 4. 再次执行 POC，全部失效
 ```
+
+---
+
+## 免责声明
+
+本仓库提供的漏洞代码和 POC 测试命令仅用于 **网络安全教学与合法授权测试**。禁止用于未经授权的系统测试或攻击，任何非法使用造成的法律后果由使用者自行承担。请遵守《中华人民共和国网络安全法》及相关法律法规。
