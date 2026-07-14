@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title">个人中心</h2>
+    <div class="user-info">
+        <h3>用户资料</h3>
+        <ul class="info-list">
+            <li><span class="info-label">ID：</span>{{ user.id }}</li>
+            <li><span class="info-label">用户名：</span>{{ user.username }}</li>
+            <li><span class="info-label">邮箱：</span>{{ user.email }}</li>
+            <li><span class="info-label">手机：</span>{{ user.phone }}</li>
+            <li><span class="info-label">余额：</span>{{ user.balance }}</li>
+        </ul>
+    </div>
+
+    <h3>充值</h3>
+    <form method="POST" action="/recharge" class="form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="user_id" value="{{ user.id }}">
+        <div class="form-group">
+            <label for="amount">充值金额</label>
+            <input type="number" id="amount" name="amount" class="form-input" placeholder="请输入金额" min="1" required>
+        </div>
+        <button type="submit" class="btn btn-primary">充值</button>
+    </form>
+
+    <h3>修改密码</h3>
+    <form method="POST" action="/change-password" class="form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        {# 修复 VULN-CP-02：不再使用隐藏字段传递 username，改为从 session 获取 #}
+        <div class="form-group">
+            <label for="old_password">原密码</label>
+            <input type="password" id="old_password" name="old_password" class="form-input" placeholder="请输入原密码" required>
+        </div>
+        <div class="form-group">
+            <label for="new_password">新密码</label>
+            <input type="password" id="new_password" name="new_password" class="form-input" placeholder="请输入新密码" minlength="6" required>
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">确认密码</label>
+            <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="请再次输入新密码" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary">修改密码</button>
+    </form>
+</div>
+{% endblock %}
