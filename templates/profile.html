@@ -24,5 +24,24 @@
         </div>
         <button type="submit" class="btn btn-primary">充值</button>
     </form>
+
+    <h3>修改密码</h3>
+    <form method="POST" action="/change-password" class="form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        {# 修复 VULN-CP-02：不再使用隐藏字段传递 username，改为从 session 获取 #}
+        <div class="form-group">
+            <label for="old_password">原密码</label>
+            <input type="password" id="old_password" name="old_password" class="form-input" placeholder="请输入原密码" required>
+        </div>
+        <div class="form-group">
+            <label for="new_password">新密码</label>
+            <input type="password" id="new_password" name="new_password" class="form-input" placeholder="请输入新密码" minlength="6" required>
+        </div>
+        <div class="form-group">
+            <label for="confirm_password">确认密码</label>
+            <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="请再次输入新密码" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary">修改密码</button>
+    </form>
 </div>
 {% endblock %}

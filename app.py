@@ -480,6 +480,56 @@ def page():
 
 
 # ═══════════════════════════════════════════
+# 【修复】修改密码路由 — 原密码校验 + CSRF + session用户
+# ═══════════════════════════════════════════
+@app.route("/change-password", methods=["POST"])
+def change_password():
+    if "username" not in session:
+        return redirect("/login")
+
+    # 修复 VULN-CP-03：CSRF Token 校验
+    if not validate_csrf_token():
+        return render_template("login.html", error="会话已过期，请刷新页面后重试！")
+
+    # 修复 VULN-CP-02：从 session 获取当前用户，不从表单获取
+    username = session.get("username")
+    old_password = request.form.get("old_password")
+    new_password = request.form.get("new_password")
+    confirm_password = request.form.get("confirm_password")
+
+    # 参数完整性校验
+    if not old_password or not new_password:
+        return "缺少参数", 400
+
+    # 修复 VULN-CP-05：后端校验两次密码一致性
+    if new_password != confirm_password:
+        return "两次输入的密码不一致", 400
+
+    # 修复 VULN-CP-04：密码强度校验
+    if len(new_password) < 6:
+        return "密码长度不能少于6位", 400
+    if len(new_password) > 128:
+        return "密码长度不能超过128位", 400
+
+    # 修复 VULN-CP-01：校验原密码
+    if username not in USERS or not check_password_hash(USERS[username]["password"], old_password):
+        return "原密码错误", 403
+
+    # 执行修改
+    USERS[username]["password"] = generate_password_hash(new_password)
+
+    # 查找用户id用于跳转
+    conn = sqlite3.connect("data/users.db")
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username=?", (username,))
+    row = c.fetchone()
+    conn.close()
+    user_id = str(row[0]) if row else "1"
+
+    return redirect(f"/profile?user_id={user_id}")
+
+
+# ═══════════════════════════════════════════
 # 启动入口
 # ═══════════════════════════════════════════
 if __name__ == "__main__":
