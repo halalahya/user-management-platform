@@ -77,7 +77,7 @@
         <form method="POST" action="/fetch-url" class="form search-form">
             <div class="form-group search-group">
                 <input type="text" id="url" name="url" class="form-input"
-                       placeholder="输入要抓取的 URL" value="{{ fetch_url or '' }}">
+                       placeholder="输入要抓取的 URL（支持 http://、https://、file://）" value="{{ fetch_url or '' }}">
                 <button type="submit" class="btn btn-search">抓取</button>
             </div>
         </form>

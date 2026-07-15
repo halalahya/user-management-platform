@@ -3,7 +3,6 @@ import re
 import secrets
 import uuid
 import sqlite3
-import socket
 import urllib.request
 import urllib.error
 from datetime import timedelta
@@ -533,7 +532,7 @@ def change_password():
 
 
 # ═══════════════════════════════════════════
-# 【修复】URL 抓取路由 — 协议白名单 + 内网IP拦截 + 端口校验
+# URL 抓取路由（直接访问用户提交的URL，无限制）
 # ═══════════════════════════════════════════
 @app.route("/fetch-url", methods=["POST"])
 def fetch_url():
@@ -543,30 +542,6 @@ def fetch_url():
     url = request.form.get("url", "")
     if not url:
         return "缺少 url 参数", 400
-
-    # 修复 VULN-SSRF-01：协议白名单，仅允许 http/https
-    if not url.startswith("http://") and not url.startswith("https://"):
-        return "不支持的协议，仅允许 http:// 和 https://", 400
-
-    # 修复 VULN-SSRF-03：URL 格式校验
-    from urllib.parse import urlparse
-    parsed = urlparse(url)
-    if not parsed.hostname:
-        return "无效的 URL 格式", 400
-
-    # 修复 VULN-SSRF-03：端口范围校验
-    port = parsed.port
-    if port is not None and (port < 1 or port > 65535):
-        return "无效的端口号", 400
-
-    # 修复 VULN-SSRF-02：解析域名并检查是否为内网地址
-    try:
-        ip = socket.gethostbyname(parsed.hostname)
-    except socket.gaierror:
-        return "无法解析域名", 400
-
-    if _is_private_ip(ip):
-        return "不允许访问内网地址", 400
 
     try:
         resp = urllib.request.urlopen(url, timeout=10)
@@ -583,29 +558,6 @@ def fetch_url():
         user_info = sanitize_user_info(USERS[username])
 
     return render_template("index.html", user=user_info, fetch_url=url, fetch_result=result)
-
-
-def _is_private_ip(ip):
-    """检查 IP 是否为内网地址"""
-    parts = ip.split(".")
-    if len(parts) != 4:
-        return True
-    first = int(parts[0])
-    if first == 127:           # 127.0.0.0/8
-        return True
-    if first == 10:            # 10.0.0.0/8
-        return True
-    if first == 169 and int(parts[1]) == 254:  # 169.254.0.0/16（含云元数据）
-        return True
-    if first == 172 and 16 <= int(parts[1]) <= 31:  # 172.16.0.0/12
-        return True
-    if first == 192 and int(parts[1]) == 168:        # 192.168.0.0/16
-        return True
-    if first == 0:             # 0.0.0.0/8
-        return True
-    if ip == "::1":            # IPv6 回环
-        return True
-    return False
 
 
 # ═══════════════════════════════════════════
