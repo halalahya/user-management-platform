@@ -399,3 +399,19 @@ body {
 .page-content p {
     margin-bottom: 12px;
 }
+
+/* URL 抓取结果 */
+.fetch-result {
+    background-color: #f5f7fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 16px;
+    font-size: 13px;
+    font-family: "Courier New", Courier, monospace;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 400px;
+    overflow-y: auto;
+    color: #333;
+}

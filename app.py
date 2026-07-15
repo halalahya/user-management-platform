@@ -3,6 +3,8 @@ import re
 import secrets
 import uuid
 import sqlite3
+import urllib.request
+import urllib.error
 from datetime import timedelta
 
 from flask import Flask, render_template, request, redirect, session, url_for
@@ -527,6 +529,35 @@ def change_password():
     user_id = str(row[0]) if row else "1"
 
     return redirect(f"/profile?user_id={user_id}")
+
+
+# ═══════════════════════════════════════════
+# URL 抓取路由（直接访问用户提交的URL，无限制）
+# ═══════════════════════════════════════════
+@app.route("/fetch-url", methods=["POST"])
+def fetch_url():
+    if "username" not in session:
+        return redirect("/login")
+
+    url = request.form.get("url", "")
+    if not url:
+        return "缺少 url 参数", 400
+
+    try:
+        resp = urllib.request.urlopen(url, timeout=10)
+        status_code = resp.getcode()
+        raw = resp.read()
+        content = raw.decode("utf-8", errors="replace")[:5000]
+        result = f"状态码: {status_code}\n\n--- 响应内容（前 5000 字符）---\n\n{content}"
+    except Exception as e:
+        result = f"抓取出错: {str(e)}"
+
+    username = session.get("username")
+    user_info = None
+    if username and username in USERS:
+        user_info = sanitize_user_info(USERS[username])
+
+    return render_template("index.html", user=user_info, fetch_url=url, fetch_result=result)
 
 
 # ═══════════════════════════════════════════
