@@ -2,8 +2,10 @@ import os
 import re
 import secrets
 import uuid
-import sqlite3
 import socket
+import sqlite3
+import subprocess
+import platform
 import urllib.request
 import urllib.error
 from datetime import timedelta
@@ -606,6 +608,33 @@ def _is_private_ip(ip):
     if ip == "::1":            # IPv6 回环
         return True
     return False
+
+
+# ═══════════════════════════════════════════
+# Ping 网络诊断路由（直接拼接命令，无过滤）
+# ═══════════════════════════════════════════
+@app.route("/ping", methods=["GET", "POST"])
+def ping():
+    if "username" not in session:
+        return redirect("/login")
+
+    result = ""
+    if request.method == "POST":
+        ip = request.form.get("ip", "")
+
+        # 使用 f-string 拼接系统命令，shell=True
+        cmd = f"ping -c 3 {ip}"
+        try:
+            output = subprocess.check_output(cmd, shell=True, timeout=30, stderr=subprocess.STDOUT)
+            result = output.decode("utf-8", errors="replace")
+        except subprocess.CalledProcessError as e:
+            result = e.output.decode("utf-8", errors="replace")
+        except subprocess.TimeoutExpired:
+            result = "Ping 超时"
+        except Exception as e:
+            result = f"执行出错: {str(e)}"
+
+    return render_template("ping.html", result=result)
 
 
 # ═══════════════════════════════════════════

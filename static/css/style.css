@@ -415,3 +415,29 @@ body {
     overflow-y: auto;
     color: #333;
 }
+
+/* Ping 控制台输出 */
+.ping-result {
+    margin-top: 20px;
+}
+
+.ping-result h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #555;
+}
+
+.console-output {
+    background-color: #1a1a1a;
+    color: #00ff00;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 20px;
+    border-radius: 6px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 500px;
+    overflow-y: auto;
+}
