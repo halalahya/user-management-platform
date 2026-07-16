@@ -9,15 +9,19 @@
 
 ```bash
 pip install flask
-python vulnerable-app.py    # 启动漏洞版（端口 5000）
+cd sqli-lab/vulnerable && python app.py    # 启动漏洞版（端口 5000）
 ```
 
 ## 项目结构
 
 ```
 sqli-lab/
-├── vulnerable-app.py       # 漏洞版（f-string 拼接 SQL）
-├── fixed-app.py            # 修复版（参数化查询）
+├── vulnerable/                  # 漏洞版（f-string 拼接 SQL）
+│   ├── app.py
+│   └── templates/
+├── fixed/                       # 修复版（参数化查询）
+│   ├── app.py
+│   └── templates/
 ├── data/users.db           # SQLite 数据库（自动生成）
 ├── templates/              # HTML 模板
 │   ├── base.html
@@ -232,7 +236,8 @@ def register():
 
 ### 修复前后对比
 
-| 对比项 | 漏洞版（vulnerable-app.py） | 修复版（fixed-app.py） |
+| 对比项 | 漏洞版（vulnerable/） | 修复版（fixed/） |
+|--------|---------------------------|----------------------|
 |--------|---------------------------|----------------------|
 | SQL 构建方式 | f-string 直接拼接 | `?` 占位符参数化 |
 | 用户输入影响 | 可改变 SQL 语义 | 仅作为参数值传递 |
@@ -246,9 +251,8 @@ def register():
 
 ```bash
 # 1. 启动漏洞版
-cd sqli-lab
-pip install flask
-python vulnerable-app.py
+cd sqli-lab/vulnerable
+python app.py
 
 # 2. 测试 POC（新开终端）
 curl http://127.0.0.1:5000/login -d "username=admin&password=admin123" -c /tmp/cookies.txt
@@ -256,7 +260,8 @@ curl "http://127.0.0.1:5000/search?keyword=%27%20UNION%20SELECT%201,%27inj%27,%2
 
 # 3. 停止漏洞版，启动修复版
 # Ctrl+C 停止，然后：
-python fixed-app.py
+cd sqli-lab/fixed
+python app.py
 
 # 4. 再次执行 POC，全部失效
 ```
