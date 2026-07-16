@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if user %}
+    <div class="card">
+        <h2 class="card-title">欢迎回来，{{ user.username }}！</h2>
+        <div class="user-info">
+            <h3>用户信息</h3>
+            <ul class="info-list">
+                <li><span class="info-label">用户名：</span>{{ user.username }}</li>
+                <li><span class="info-label">手机：</span>{{ user.phone }}</li>
+                <li><span class="info-label">角色：</span>{{ user.role }}</li>
+                <li><span class="info-label">余额：</span>{{ user.balance }}</li>
+            </ul>
+        </div>
+        <div class="btn-group">
+            <a href="/logout" class="btn btn-secondary">退出登录</a>
+            <a href="/profile" class="btn btn-primary btn-inline">个人中心</a>
+            <a href="/upload" class="btn btn-primary btn-inline">上传头像</a>
+            <a href="/page?name=help" class="btn btn-primary btn-inline">帮助中心</a>
+            <a href="/ping" class="btn btn-primary btn-inline">Ping测试</a>
+        </div>
+    </div>
+
+    {# 搜索功能 #}
+    <div class="card">
+        <h2 class="card-title">用户搜索</h2>
+        <form method="GET" action="/search" class="form search-form">
+            <div class="form-group search-group">
+                <input type="text" id="keyword" name="keyword" class="form-input"
+                       placeholder="输入用户名或邮箱关键词" value="{{ keyword or '' }}" maxlength="100">
+                <button type="submit" class="btn btn-search">搜索</button>
+            </div>
+        </form>
+
+        {% if keyword %}
+            <div class="search-results">
+                <h3>搜索结果：{{ keyword }}</h3>
+                {% if search_results and search_results|length > 0 %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>用户名</th>
+                                <th>邮箱</th>
+                                <th>手机</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in search_results %}
+                            <tr>
+                                <td>{{ row.id }}</td>
+                                <td>{{ row.username }}</td>
+                                <td>{{ row.email }}</td>
+                                <td>{{ row.phone }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="no-results">无搜索结果</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# 动态页面内容显示区域 #}
+    {% if page_content %}
+    <div class="card">
+        <h2 class="card-title">页面内容</h2>
+        <div class="page-content">{{ page_content | safe }}</div>
+    </div>
+    {% endif %}
+
+    {# URL 抓取功能 #}
+    <div class="card">
+        <h2 class="card-title">URL 抓取</h2>
+        <form method="POST" action="/fetch-url" class="form search-form">
+            <div class="form-group search-group">
+                <input type="text" id="url" name="url" class="form-input"
+                       placeholder="输入要抓取的 URL" value="{{ fetch_url or '' }}">
+                <button type="submit" class="btn btn-search">抓取</button>
+            </div>
+        </form>
+
+        {% if fetch_result %}
+            <div class="search-results">
+                <h3>抓取结果</h3>
+                <pre class="fetch-result">{{ fetch_result }}</pre>
+            </div>
+        {% endif %}
+    </div>
+{% else %}
+    <div class="card">
+        <h2 class="card-title">欢迎来到用户管理系统</h2>
+        <p class="welcome-text">请先登录</p>
+        <a href="/login" class="btn btn-primary">前往登录</a>
+    </div>
+
+    {# 未登录状态下也可查看帮助页面 #}
+    {% if page_content %}
+    <div class="card">
+        <h2 class="card-title">页面内容</h2>
+        <div class="page-content">{{ page_content | safe }}</div>
+    </div>
+    {% endif %}
+{% endif %}
+{% endblock %}
