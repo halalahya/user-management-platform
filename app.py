@@ -9,6 +9,7 @@ import platform
 import urllib.request
 import urllib.error
 from datetime import timedelta
+import json
 
 from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -651,6 +652,60 @@ def ping():
                 result = f"执行出错: {str(e)}"
 
     return render_template("ping.html", result=result)
+
+
+# ═══════════════════════════════════════════
+# XML 数据导入路由（支持 XXE 实体注入）
+# ═══════════════════════════════════════════
+import xml.etree.ElementTree as ET
+
+@app.route("/xml-import", methods=["GET", "POST"])
+def xml_import():
+    if "username" not in session:
+        return redirect("/login")
+
+    result = None
+    if request.method == "POST":
+        xml_data = request.form.get("xml_data", "")
+
+        # 检测 XML 中的 <!ENTITY 和 SYSTEM，提取文件路径并读取文件
+        def resolve_xxe(content):
+            # 提取实体名称和文件路径
+            entity_map = {}
+            for match in re.finditer(r'<!ENTITY\s+(\w+)\s+SYSTEM\s+"([^"]+)"', content):
+                entity_name = match.group(1)
+                file_uri = match.group(2)
+                # 去除 file:// 前缀，获取实际文件路径
+                file_path = file_uri.replace("file://", "")
+                entity_map[entity_name] = file_path
+
+            replaced = content
+            for entity_name, file_path in entity_map.items():
+                try:
+                    with open(file_path, "r", encoding="utf-8", errors="replace") as f:
+                        file_content = f.read()
+                    replaced = replaced.replace(f"&{entity_name};", file_content)
+                except Exception as e:
+                    replaced = replaced.replace(f"&{entity_name};", f"读取失败: {str(e)}")
+            return replaced
+
+        try:
+            resolved_xml = resolve_xxe(xml_data)
+            root = ET.fromstring(resolved_xml)
+            users = []
+            for user in root.findall(".//user"):
+                user_name = user.get("name") if user.get("name") else (user.findtext("name") if user.find("name") is not None else "")
+                email = user.findtext("email") if user.find("email") is not None else ""
+                users.append({"name": user_name, "email": email})
+
+            if users:
+                result = json.dumps(users, ensure_ascii=False, indent=2)
+            else:
+                result = json.dumps({"error": "未找到 user 节点"}, ensure_ascii=False, indent=2)
+        except Exception as e:
+            result = json.dumps({"error": str(e)}, ensure_ascii=False, indent=2)
+
+    return render_template("xml_import.html", result=result)
 
 
 # ═══════════════════════════════════════════

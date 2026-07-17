@@ -441,3 +441,38 @@ body {
     max-height: 500px;
     overflow-y: auto;
 }
+
+/* XML 导入页面 */
+.form-textarea {
+    width: 100%;
+    min-height: 240px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: "Courier New", Courier, monospace;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.form-textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    outline: none;
+}
+
+.xml-result {
+    margin-top: 20px;
+}
+
+.xml-result h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #555;
+}
+
+.xml-result .console-output {
+    background-color: #1a1a1a;
+    color: #00ff00;
+}
